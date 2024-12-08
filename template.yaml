@@ -32,7 +32,7 @@ Resources:
         Target: 'es2020'
         Sourcemap: true
         EntryPoints:
-          - app.ts
+          - stations.ts
   CongestionsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -54,7 +54,7 @@ Resources:
         Target: 'es2020'
         Sourcemap: true
         EntryPoints:
-          - app.ts
+          - congestions.ts
   ArrivalsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -76,7 +76,7 @@ Resources:
         Target: 'es2020'
         Sourcemap: true
         EntryPoints:
-          - app.ts
+          - arrivals.ts
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
