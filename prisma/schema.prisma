@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["rhel-openssl-3.0.x", "native"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// 이거는 workaround 일 뿐 권장되는 방식은 아니더라
+model Station {
+  mongoId     String @id @default(auto()) @map("_id") @db.ObjectId
+  id          Int
+  name        String
+  line_number String
+  latitude    Float
+  longitude   Float
+
+  @@map("stations")
+}
+
+model Congestion {
+  mongoId      String           @id @default(auto()) @map("_id") @db.ObjectId
+  id           Int
+  date_type    String
+  line_number  String
+  station_id   String
+  station_name String
+  direction    String
+  congestions  CongestionInfo[]
+
+  @@map("congestions")
+}
+
+type CongestionInfo {
+  time   String
+  degree Float
+}
