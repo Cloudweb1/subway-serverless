@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  MetroData API
+  AWS Lambda + API Gateway를 활용하여 제작된 지하철 정보 REST API
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  # API Gateway Specification
+  MetroApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: v1
+      EndpointConfiguration:
+        Type: REGIONAL
+      Cors:
+        AllowOrigin: "'*'"
+        AllowMethods: "'GET, OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+  # Lambda Functions
+  StationsFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: StationsFunction-v1
+      CodeUri: src/
+      Handler: api/stations.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Events:
+        MetroApi:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /api/metro/stations
+            Method: get
+            RestApiId: !Ref MetroApi
+    Metadata:
+      # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: false
+        EntryPoints:
+          - api/stations.ts
+          - database/stations.ts
+  CongestionsFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: CongestionsFunction-v1
+      CodeUri: src/
+      Handler: api/congestions.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Events:
+        MetroApi:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /api/metro/stations/{stationName}/congestions
+            Method: get
+            RestApiId: !Ref MetroApi
+    Metadata:
+      # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: false
+        EntryPoints:
+          - api/congestions.ts
+          - database/congestions.ts
+          - utils/datetime.ts
+  ArrivalsFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: ArrivalsFunction-v1
+      CodeUri: src/
+      Handler: api/arrivals.handler
+      Runtime: nodejs20.x
+      Timeout: 10
+      Architectures:
+        - x86_64
+      Events:
+        MetroApi:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /api/metro/stations/{stationName}/arrivals
+            Method: get
+            RestApiId: !Ref MetroApi
+    Metadata:
+      # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: false
+        EntryPoints:
+          - api/arrivals.ts
+          - database/arrivals.ts
+          - utils/datetime.ts
+          - utils/openapi/serializer.ts
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  WebEndpoint:
+    Description: Public endpoints for Metro API
+    Value: !Sub https://${MetroApi}.execute-api.${AWS::Region}.amazonaws.com/v1
+  StationsFunctionArn:
+    Description: Stations Lambda Function ARN
+    Value: !GetAtt StationsFunction.Arn
+  CongestionsFunctionArn:
+    Description: Congestions Lambda Function ARN
+    Value: !GetAtt CongestionsFunction.Arn
+  ArrivalsFunctionArn:
+    Description: Arrivals Lambda Function ARN
+    Value: !GetAtt ArrivalsFunction.Arn
