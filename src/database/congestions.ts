@@ -70,7 +70,3 @@ export async function getStationCongestionInfo(stationId: string, dateType: Date
 
   return result;
 }
-
-getStationCongestionInfo('729', 'weekdays', '08:00').then(result => {
-  console.log(result);
-});
