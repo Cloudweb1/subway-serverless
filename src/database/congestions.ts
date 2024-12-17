@@ -67,8 +67,8 @@ export async function getStationCongestionInfo(stationId: string, dateType: Date
 
   const result = {
     lineNumber: upDegreeResult.line_number,
-    upDegree: upDegreeCongestions ? upDegreeCongestions : 0,
-    downDegree: downDegreeCongestions ? downDegreeCongestions : 0,
+    upDegree: upDegreeCongestions ? upDegreeCongestions.degree : 0,
+    downDegree: downDegreeCongestions ? downDegreeCongestions.degree : 0,
   };
 
   return result;
