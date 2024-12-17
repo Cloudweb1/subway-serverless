@@ -61,11 +61,14 @@ export async function getStationCongestionInfo(stationId: string, dateType: Date
   });
 
   // [상행선, 하행선]
-  const [upDegree, downDegree] = JSON.parse(JSON.stringify(rawQueryResult)) as RawCongestionQueryResult[];
+  const [upDegreeResult, downDegreeResult] = JSON.parse(JSON.stringify(rawQueryResult)) as RawCongestionQueryResult[];
+  const upDegreeCongestions = upDegreeResult.congestions.pop();
+  const downDegreeCongestions = downDegreeResult.congestions.pop();
+
   const result = {
-    lineNumber: upDegree.line_number,
-    upDegree: upDegree.congestions.pop(),
-    downDegree: downDegree.congestions.pop(),
+    lineNumber: upDegreeResult.line_number,
+    upDegree: upDegreeCongestions ? upDegreeCongestions : 0,
+    downDegree: downDegreeCongestions ? downDegreeCongestions : 0,
   };
 
   return result;
