@@ -61,7 +61,7 @@ Resources:
         MetroApi:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /api/metro/stations/{stationName}/congestions
+            Path: /api/metro/stations/{stationId}/congestions
             Method: get
             RestApiId: !Ref MetroApi
     Metadata:
