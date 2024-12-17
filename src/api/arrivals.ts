@@ -13,15 +13,15 @@ import getDateTimeInfo from '../utils/datetime';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    const stationName = event.pathParameters?.stationName;
-    if (!stationName) {
+    const stationId = event.pathParameters?.stationId;
+    if (!stationId) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ detail: 'stationName 은 필수입니다' }),
+        body: JSON.stringify({ detail: 'stationId 은 필수입니다' }),
       };
     }
     const { time } = getDateTimeInfo();
-    const result = await getArrivalInfo(decodeURIComponent(stationName), time);
+    const result = await getArrivalInfo(parseInt(stationId), time);
     return {
       statusCode: 200,
       body: JSON.stringify(result),

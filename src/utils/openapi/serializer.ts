@@ -1,5 +1,3 @@
-import { Station } from '@prisma/client';
-
 interface Delta {
   [key: number]: number;
 }
@@ -52,53 +50,33 @@ export interface SWOpenApiArrival {
 }
 
 export interface SerializedArrival {
-  name: string;
-  lineNumber: number;
   direction: string;
-  prevStation: string;
-  nextStation: string;
   arriveTime: string;
 }
 
-export default function serializeArrivalList(arrival: SWOpenApiArrival, time: string, stations: Station[]) {
+export default function serializeArrivalList(arrival: SWOpenApiArrival, time: string) {
+  const { barvlDt, updnLine } = arrival;
+
   const [hh, mm] = time.split(':');
-  const arriveTimeMins = Math.floor(parseInt(arrival.barvlDt) / 60);
+  const arriveTimeMins = Math.floor(parseInt(barvlDt) / 60);
 
-  const lineNumber = lineNumberDelta[parseInt(arrival.subwayId)];
-  if (lineNumber) {
-    // 이전, 다음 역명 구하기
-    const prevStation = stations.find(station => {
-      const stationNum = station.id + stationDelta[lineNumber];
-      return stationNum.toString() === arrival.statnFid.slice(-3);
-    });
-
-    const nextStation = stations.find(station => {
-      const stationNum = station.id + stationDelta[lineNumber];
-      return stationNum.toString() === arrival.statnTid.slice(-3);
-    });
-
-    // 시간 구하기
-    let newHour = parseInt(hh);
-    let newMinute = parseInt(mm) + arriveTimeMins;
-    if (newMinute >= 60) {
-      newMinute -= 60;
-      newHour += 1;
-    }
-    newHour = newHour % 24;
-
-    const serializedArrival: SerializedArrival = {
-      name: arrival.statnNm,
-      lineNumber,
-      direction: arrival.updnLine === '상행' || arrival.updnLine === '내선' ? '1' : '2',
-      prevStation: prevStation ? prevStation.name : '이전역 없음',
-      nextStation: nextStation ? nextStation.name : '다음역 없음',
-      arriveTime: `${newHour.toLocaleString('en-US', {
-        minimumIntegerDigits: 2,
-      })}:${newMinute.toLocaleString('en-US', {
-        minimumIntegerDigits: 2,
-      })}`,
-    };
-
-    return serializedArrival;
+  // 시간 구하기
+  let newHour = parseInt(hh);
+  let newMinute = parseInt(mm) + arriveTimeMins;
+  if (newMinute >= 60) {
+    newMinute -= 60;
+    newHour += 1;
   }
+  newHour = newHour % 24;
+
+  const arriveTime = `${newHour.toLocaleString('en-US', {
+    minimumIntegerDigits: 2,
+  })}:${newMinute.toLocaleString('en-US', {
+    minimumIntegerDigits: 2,
+  })}`;
+
+  return {
+    arriveTime,
+    direction: updnLine,
+  };
 }
